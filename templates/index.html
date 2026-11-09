@@ -1195,4 +1195,596 @@
                     <div class="form-group">
                         <label>Symptoms / Notes</label>
                         <textarea id="pSymptoms" placeholder="Describe chief complaints..."></textarea>
-                    
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class='bx bx-plus-circle'></i>
+                        Register Patient
+                    </button>
+                </form>
+            </div>
+
+            <!-- RIGHT: Main View with Tabs -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i class='bx bx-grid-alt'></i>
+                        Operations Center
+                    </div>
+                    <span class="panel-badge success">LIVE</span>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab active" data-tab="triage">
+                        <i class='bx bxs-ambulance'></i> Emergency Triage
+                    </button>
+                    <button class="tab" data-tab="routine">
+                        <i class='bx bx-list-ul'></i> Routine Queue
+                    </button>
+                    <button class="tab" data-tab="history">
+                        <i class='bx bx-history'></i> History
+                    </button>
+                    <button class="tab" data-tab="search">
+                        <i class='bx bx-search'></i> Records
+                    </button>
+                    <button class="tab" data-tab="benchmark">
+                        <i class='bx bx-tachometer'></i> Benchmark
+                    </button>
+                </div>
+
+                <!-- Triage Tab -->
+                <div class="tab-content active" id="triage-tab">
+                    <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                        <button class="btn btn-danger" id="callEmergency" style="flex: 1;">
+                            <i class='bx bxs-bell-ring'></i>
+                            Treat Top Priority (Extract-Max)
+                        </button>
+                    </div>
+                    <div class="patient-list" id="triageList">
+                        <div class="empty-state">
+                            <i class='bx bx-shield-plus'></i>
+                            <p>No emergency patients in triage</p>
+                            <small>Priority queue is empty</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Routine Tab -->
+                <div class="tab-content" id="routine-tab">
+                    <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                        <button class="btn btn-primary" id="callRoutine" style="flex: 1;">
+                            <i class='bx bx-bell'></i>
+                            Call Next Patient (Dequeue)
+                        </button>
+                    </div>
+                    <div class="patient-list" id="queueList">
+                        <div class="empty-state">
+                            <i class='bx bx-calendar-check'></i>
+                            <p>No patients in routine queue</p>
+                            <small>FIFO queue is empty</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History Tab -->
+                <div class="tab-content" id="history-tab">
+                    <div style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+                        <i class='bx bx-info-circle'></i>
+                        Recent treatment history (last 10 patients)
+                    </div>
+                    <div class="timeline" id="historyList">
+                        <div class="empty-state">
+                            <i class='bx bx-time'></i>
+                            <p>No treatment history yet</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search Tab -->
+                <div class="tab-content" id="search-tab">
+                    <div style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+                        <i class='bx bx-info-circle'></i>
+                        BST-based patient record lookup (compares Linear vs BST Search)
+                    </div>
+                    <div class="search-container">
+                        <input type="number" id="searchId" placeholder="Enter Patient ID">
+                        <button class="btn btn-primary" onclick="searchPatient()" style="width: auto; padding: 0 2rem;">
+                            <i class='bx bx-search-alt'></i> Search
+                        </button>
+                    </div>
+                    <div id="searchResult"></div>
+                </div>
+
+                <!-- Benchmark Tab -->
+                <div class="tab-content" id="benchmark-tab">
+                    <div style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+                        <i class='bx bx-info-circle'></i>
+                        <strong>ILO2 Requirement:</strong> Compare Linear Search O(N) vs Binary Search O(log N)
+                    </div>
+
+                    <div class="benchmark-input">
+                        <input type="number" id="recordCount" value="100000" placeholder="Dataset size">
+                        <button class="btn btn-primary" onclick="runBenchmark()">
+                            <i class='bx bx-play'></i> Run Benchmark
+                        </button>
+                    </div>
+
+                    <div class="benchmark-container">
+                        <div class="chart-wrapper">
+                            <div class="chart-container">
+                                <div class="bar-group">
+                                    <div class="bar-time" id="linearTime" style="color: var(--accent-red)">0 ms</div>
+                                    <div class="bar-wrapper">
+                                        <div class="bar linear" id="linearBar" style="height: 20px;"></div>
+                                    </div>
+                                    <div class="bar-label">Linear Search</div>
+                                </div>
+                                <div class="bar-group">
+                                    <div class="bar-time" id="binaryTime" style="color: var(--accent-green)">0 ms</div>
+                                    <div class="bar-wrapper">
+                                        <div class="bar binary" id="binaryBar" style="height: 20px;"></div>
+                                    </div>
+                                    <div class="bar-label">Binary Search</div>
+                                </div>
+                            </div>
+                            <div class="complexity-badges">
+                                <div class="complexity-badge" style="background: rgba(239, 68, 68, 0.15); color: var(--accent-red);">O(N)</div>
+                                <div class="complexity-badge" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-green);">O(log N)</div>
+                            </div>
+                        </div>
+
+                        <div class="benchmark-results">
+                            <h3 style="margin-bottom: 1rem; font-size: 1rem;">
+                                <i class='bx bx-bar-chart-square' style="color: var(--accent-cyan)"></i> 
+                                Analysis Results
+                            </h3>
+                            <div class="result-row">
+                                <span class="result-label">Dataset Size</span>
+                                <span class="result-value" id="resSize">—</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">Linear Search Time</span>
+                                <span class="result-value" style="color: var(--accent-red)" id="resLinear">—</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">Binary Search Time</span>
+                                <span class="result-value" style="color: var(--accent-green)" id="resBinary">—</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">Performance Speedup</span>
+                                <span class="result-value speedup-highlight" id="resSpeedup">—</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">Winner</span>
+                                <span class="result-value" id="resWinner" style="color: var(--accent-green)">—</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>CpE 411 Final Project • Built with <strong>Python Flask</strong> • Batangas State University - Alangilan Campus</p>
+            <p style="margin-top: 0.5rem;">Data Structures: <strong>Max-Heap</strong> • <strong>Queue (FIFO)</strong> • <strong>Binary Search Tree</strong></p>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <i class="toast-icon bx"></i>
+        <div>
+            <div style="font-weight: 700;" id="toastTitle">Title</div>
+            <div style="font-size: 0.85rem; color: var(--text-secondary);" id="toastMsg">Message</div>
+        </div>
+    </div>
+
+    <!-- Called Patient Modal -->
+    <div class="modal-overlay" id="calledModal">
+        <div class="modal">
+            <div class="modal-icon" id="modalIcon">🚨</div>
+            <h2 id="modalTitle">Now Treating</h2>
+            <p id="modalSubtitle">Please proceed to the treatment room</p>
+            <div class="modal-details" id="modalDetails"></div>
+            <button class="btn btn-primary" onclick="closeModal()">
+                <i class='bx bx-check'></i> Acknowledged
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ================================
+        // LIVE CLOCK
+        // ================================
+        function updateClock() {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            const s = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('liveTime').textContent = `${h}:${m}:${s}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // ================================
+        // TAB SWITCHING
+        // ================================
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab + '-tab').classList.add('active');
+            });
+        });
+
+        // ================================
+        // SEVERITY SLIDER
+        // ================================
+        const severitySlider = document.getElementById('pSeverity');
+        const severityVal = document.getElementById('severityVal');
+        const severityLevel = document.getElementById('severityLevel');
+
+        function updateSeverity() {
+            const v = parseInt(severitySlider.value);
+            severityVal.textContent = v;
+            let label, color;
+            if (v >= 9) { label = 'CRITICAL'; color = '#ef4444'; }
+            else if (v >= 7) { label = 'HIGH'; color = '#f97316'; }
+            else if (v >= 4) { label = 'MEDIUM'; color = '#eab308'; }
+            else { label = 'LOW'; color = '#10b981'; }
+            severityLevel.textContent = label;
+            severityLevel.style.background = color + '30';
+            severityLevel.style.color = color;
+        }
+        severitySlider.addEventListener('input', updateSeverity);
+        updateSeverity();
+
+        // ================================
+        // TOGGLE SEVERITY FIELD
+        // ================================
+        document.getElementById('pType').addEventListener('change', (e) => {
+            document.getElementById('severityGroup').style.display = 
+                e.target.value === 'emergency' ? 'block' : 'none';
+        });
+
+        // ================================
+        // TOAST NOTIFICATIONS
+        // ================================
+        function showToast(title, message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const icon = toast.querySelector('.toast-icon');
+            toast.className = `toast show ${type}`;
+            document.getElementById('toastTitle').textContent = title;
+            document.getElementById('toastMsg').textContent = message;
+            
+            const iconMap = { success: 'bx-check-circle', error: 'bx-error-circle', info: 'bx-info-circle' };
+            icon.className = `toast-icon bx ${iconMap[type]}`;
+            
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        // ================================
+        // MODAL
+        // ================================
+        function showCalledModal(patient, type) {
+            const modal = document.getElementById('calledModal');
+            const icon = document.getElementById('modalIcon');
+            const title = document.getElementById('modalTitle');
+            const subtitle = document.getElementById('modalSubtitle');
+            const details = document.getElementById('modalDetails');
+
+            if (type === 'emergency') {
+                icon.className = 'modal-icon emergency';
+                icon.textContent = '🚨';
+                title.textContent = 'EMERGENCY ALERT';
+                subtitle.textContent = `Immediate attention required!`;
+            } else {
+                icon.className = 'modal-icon routine';
+                icon.textContent = '👋';
+                title.textContent = 'Next Patient';
+                subtitle.textContent = 'Please proceed to the consultation room';
+            }
+
+            details.innerHTML = `
+                <div><strong>Name:</strong><span>${patient.name}</span></div>
+                <div><strong>ID:</strong><span>${patient.id}</span></div>
+                <div><strong>Age:</strong><span>${patient.age}</span></div>
+                ${patient.severity ? `<div><strong>Severity:</strong><span style="color: var(--accent-red)">${patient.severity}/10</span></div>` : ''}
+                <div><strong>Symptoms:</strong><span>${patient.symptoms}</span></div>
+            `;
+
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('calledModal').classList.remove('active');
+        }
+
+        // ================================
+        // HELPERS
+        // ================================
+        function getSeverityClass(severity) {
+            if (severity >= 9) return 'critical';
+            if (severity >= 7) return 'high';
+            if (severity >= 4) return 'medium';
+            return 'low';
+        }
+
+        function getInitials(name) {
+            return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+        }
+
+        function getAvatarColor(name) {
+            const colors = ['#06b6d4', '#8b5cf6', '#ec4899', '#f97316', '#10b981', '#3b82f6'];
+            return colors[name.charCodeAt(0) % colors.length];
+        }
+
+        // ================================
+        // FORM SUBMIT - ADD PATIENT
+        // ================================
+        document.getElementById('patientForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const type = document.getElementById('pType').value;
+            const payload = {
+                name: document.getElementById('pName').value,
+                id: document.getElementById('pId').value,
+                age: document.getElementById('pAge').value,
+                gender: document.getElementById('pGender').value,
+                contact: document.getElementById('pContact').value,
+                type: type,
+                severity: type === 'emergency' ? document.getElementById('pSeverity').value : 0,
+                symptoms: document.getElementById('pSymptoms').value || 'Not specified'
+            };
+
+            try {
+                const res = await fetch('/api/add_patient', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (data.error) {
+                    showToast('Error', data.error, 'error');
+                    return;
+                }
+
+                showToast('✅ Patient Registered!', `${payload.name} added to ${type === 'emergency' ? 'triage' : 'routine queue'}`, 'success');
+                renderAll(data);
+                document.getElementById('patientForm').reset();
+                document.getElementById('severityGroup').style.display = 'none';
+                updateSeverity();
+            } catch (err) {
+                showToast('Error', 'Failed to add patient', 'error');
+            }
+        });
+
+        // ================================
+        // CALL BUTTONS
+        // ================================
+        document.getElementById('callRoutine').addEventListener('click', async () => {
+            const res = await fetch('/api/next_routine', { method: 'POST' });
+            const data = await res.json();
+            if (data.called) {
+                showCalledModal(data.called, 'routine');
+                renderAll(data);
+            } else {
+                showToast('Empty Queue', 'No routine patients waiting', 'info');
+            }
+        });
+
+        document.getElementById('callEmergency').addEventListener('click', async () => {
+            const res = await fetch('/api/next_emergency', { method: 'POST' });
+            const data = await res.json();
+            if (data.called) {
+                showCalledModal(data.called, 'emergency');
+                renderAll(data);
+            } else {
+                showToast('No Emergencies', 'Triage queue is empty', 'info');
+            }
+        });
+
+        // ================================
+        // RENDER FUNCTIONS
+        // ================================
+        function renderAll(data) {
+            if (data.triage !== undefined) renderTriage(data.triage);
+            if (data.queue !== undefined) renderQueue(data.queue);
+            if (data.history !== undefined) renderHistory(data.history);
+            if (data.stats !== undefined) renderStats(data.stats, data.triage, data.queue);
+        }
+
+        function renderStats(stats, triage, queue) {
+            document.getElementById('statRegistered').textContent = stats.total_registered || 0;
+            document.getElementById('statTreated').textContent = stats.total_treated || 0;
+            document.getElementById('statEmergency').textContent = triage ? triage.length : 0;
+            document.getElementById('statRoutine').textContent = queue ? queue.length : 0;
+        }
+
+        function renderTriage(patients) {
+            const container = document.getElementById('triageList');
+            if (!patients || patients.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class='bx bx-shield-plus'></i>
+                        <p>No emergency patients in triage</p>
+                        <small>Priority queue is empty</small>
+                    </div>`;
+                return;
+            }
+            container.innerHTML = patients.map((p, i) => {
+                const sevClass = getSeverityClass(p.severity);
+                return `
+                <div class="patient-card ${sevClass}">
+                    <div class="patient-avatar" style="background: ${getAvatarColor(p.name)}30; color: ${getAvatarColor(p.name)};">
+                        ${getInitials(p.name)}
+                    </div>
+                    <div class="patient-info">
+                        <div class="patient-name">
+                            ${i === 0 ? '🔥 ' : ''}${p.name}
+                        </div>
+                        <div class="patient-meta">
+                            <span><i class='bx bx-id-card'></i> ID: ${p.id}</span>
+                            <span><i class='bx bx-user'></i> ${p.age}y ${p.gender}</span>
+                            <span><i class='bx bx-time'></i> ${p.registered_at}</span>
+                        </div>
+                    </div>
+                    <div class="severity-badge ${sevClass}">
+                        ${p.severity}/10
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderQueue(patients) {
+            const container = document.getElementById('queueList');
+            if (!patients || patients.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class='bx bx-calendar-check'></i>
+                        <p>No patients in routine queue</p>
+                        <small>FIFO queue is empty</small>
+                    </div>`;
+                return;
+            }
+            container.innerHTML = patients.map((p, i) => `
+                <div class="patient-card routine">
+                    <div class="queue-number">#${i + 1}</div>
+                    <div class="patient-info">
+                        <div class="patient-name">${i === 0 ? '👉 ' : ''}${p.name}</div>
+                        <div class="patient-meta">
+                            <span><i class='bx bx-id-card'></i> ID: ${p.id}</span>
+                            <span><i class='bx bx-user'></i> ${p.age}y</span>
+                            <span><i class='bx bx-time'></i> ${p.registered_at}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderHistory(history) {
+            const container = document.getElementById('historyList');
+            if (!history || history.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class='bx bx-time'></i>
+                        <p>No treatment history yet</p>
+                    </div>`;
+                return;
+            }
+            container.innerHTML = history.map(p => `
+                <div class="timeline-item">
+                    <div class="timeline-icon">
+                        <i class='bx ${p.type === 'emergency' ? 'bxs-ambulance' : 'bx-check-circle'}'></i>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="timeline-name">${p.name} (ID: ${p.id})</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                            ${p.type === 'emergency' ? `Severity ${p.severity}/10 • ` : ''}${p.symptoms}
+                        </div>
+                        <div class="timeline-time">Treated at ${p.treated_at}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ================================
+        // SEARCH PATIENT
+        // ================================
+        async function searchPatient() {
+            const id = document.getElementById('searchId').value;
+            if (!id) { showToast('Error', 'Please enter a Patient ID', 'error'); return; }
+
+            const res = await fetch('/api/search_patient', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id })
+            });
+            const data = await res.json();
+
+            const container = document.getElementById('searchResult');
+            if (data.patient) {
+                container.innerHTML = `
+                    <div class="search-result">
+                        <h3 style="margin-bottom: 1rem;">
+                            <i class='bx bx-check-circle' style="color: var(--accent-green)"></i>
+                            Patient Found
+                        </h3>
+                        <div class="modal-details">
+                            <div><strong>Name:</strong><span>${data.patient.name}</span></div>
+                            <div><strong>ID:</strong><span>${data.patient.id}</span></div>
+                            <div><strong>Age:</strong><span>${data.patient.age} / ${data.patient.gender}</span></div>
+                            <div><strong>Contact:</strong><span>${data.patient.contact}</span></div>
+                            <div><strong>Type:</strong><span>${data.patient.type}</span></div>
+                            ${data.patient.severity ? `<div><strong>Severity:</strong><span>${data.patient.severity}/10</span></div>` : ''}
+                            <div><strong>Symptoms:</strong><span>${data.patient.symptoms}</span></div>
+                            <div><strong>Registered:</strong><span>${data.patient.registered_at}</span></div>
+                        </div>
+                        <div style="background: rgba(6, 182, 212, 0.1); padding: 1rem; border-radius: 10px; margin-top: 1rem;">
+                            <div style="font-weight: 700; margin-bottom: 0.5rem;">⚡ Search Performance Comparison</div>
+                            <div style="display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;">
+                                <span>Linear: <span style="color: var(--accent-red)">${data.linear_time_ms}ms</span></span>
+                                <span>BST: <span style="color: var(--accent-green)">${data.bst_time_ms}ms</span></span>
+                                <span>Records: ${data.total_records}</span>
+                            </div>
+                        </div>
+                    </div>`;
+            } else {
+                container.innerHTML = `
+                    <div class="search-result">
+                        <div style="text-align: center; padding: 1rem;">
+                            <i class='bx bx-error-circle' style="font-size: 3rem; color: var(--accent-red);"></i>
+                            <p style="margin-top: 1rem;">No patient found with ID: <strong>${id}</strong></p>
+                        </div>
+                    </div>`;
+            }
+        }
+
+        // ================================
+        // BENCHMARK
+        // ================================
+        async function runBenchmark() {
+            const size = document.getElementById('recordCount').value;
+            if (size < 100) { showToast('Error', 'Minimum size is 100', 'error'); return; }
+
+            showToast('Running', `Benchmarking with ${size} records...`, 'info');
+
+            const res = await fetch('/api/benchmark', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ size: size })
+            });
+            const data = await res.json();
+
+            document.getElementById('linearTime').textContent = data.linear_time_ms + ' ms';
+            document.getElementById('binaryTime').textContent = data.binary_time_ms + ' ms';
+            document.getElementById('resSize').textContent = parseInt(data.size).toLocaleString();
+            document.getElementById('resLinear').textContent = data.linear_time_ms + ' ms';
+            document.getElementById('resBinary').textContent = data.binary_time_ms + ' ms';
+            document.getElementById('resSpeedup').textContent = data.speedup + '× faster';
+            document.getElementById('resWinner').textContent = data.binary_time_ms < data.linear_time_ms ? '🏆 Binary Search' : '🏆 Linear Search';
+
+            const maxTime = Math.max(data.linear_time_ms, data.binary_time_ms, 0.001);
+            document.getElementById('linearBar').style.height = `${Math.max((data.linear_time_ms / maxTime) * 160, 20)}px`;
+            document.getElementById('binaryBar').style.height = `${Math.max((data.binary_time_ms / maxTime) * 160, 20)}px`;
+
+            showToast('✅ Benchmark Complete', `Binary search is ${data.speedup}× faster!`, 'success');
+        }
+
+        // ================================
+        // INITIAL LOAD
+        // ================================
+        window.addEventListener('load', async () => {
+            const res = await fetch('/api/get_stats');
+            const data = await res.json();
+            renderAll(data);
+        });
+
+        // Close modal on outside click
+        document.getElementById('calledModal').addEventListener('click', (e) => {
+            if (e.target.id === 'calledModal') closeModal();
+        });
+    </script>
+</body>
+</html>
