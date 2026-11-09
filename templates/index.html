@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Campus Medical Triage</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --primary: #00f2fe;
+            --secondary: #4facfe;
+            --danger: #ff0844;
+            --warning: #ffb199;
+            --text: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(79, 172, 254, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(255, 8, 68, 0.1) 0px, transparent 50%);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        h1, h2, h3 { font-weight: 800; letter-spacing: -0.5px; }
+        
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+        }
+
+        /* Glass Panels */
+        .panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        /* Input Form */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            color: #94a3b8;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        input, select {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.75rem;
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+        }
+
+        button {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #000;
+            border: none;
+            padding: 1rem;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 242, 254, 0.4);
+        }
+
+        /* Main Display Grid */
+        .display-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        .full-width { grid-column: 1 / -1; }
+
+        /* Triage (Min-Heap) */
+        .critical-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .patient-card {
+            background: rgba(255, 8, 68, 0.1);
+            border-left: 4px solid var(--danger);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideIn 0.3s ease-out;
+        }
+        .patient-card.severe { background: rgba(255, 177, 153, 0.1); border-left-color: var(--warning); }
+
+        /* Routine Queue */
+        .queue-list {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding: 1rem 0;
+        }
+        .queue-item {
+            background: rgba(0, 242, 254, 0.1);
+            border: 1px solid var(--primary);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            white-space: nowrap;
+            font-family: 'Space Mono', monospace;
+        }
+
+        /* Benchmark Section */
+        .benchmark-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .benchmark-controls input { width: auto; flex-grow: 1; }
+        .benchmark-controls button { width: auto; padding: 0.75rem 1.5rem; }
+        
+        .chart-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 2rem;
+            height: 200px;
+            padding-top: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+            border-left: 1px solid var(--glass-border);
+            padding-left: 1rem;
+        }
+        .bar-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .bar {
+            width: 60px;
+            border-radius: 5px 5px 0 0;
+            transition: height 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 0 15px rgba(255,255,255,0.1);
+        }
+        .bar.linear { background: linear-gradient(to top, #ff0844, #ffb199); height: 0; }
+        .bar.binary { background: linear-gradient(to top, #00f2fe, #4facfe); height: 0; }
+        .bar-label { font-size: 0.8rem; color: #94a3b8; text-align: center; }
+        .bar-time { font-family: 'Space Mono'; font-size: 0.9rem; color: white; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .stat-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            background: rgba(255, 255, 255, 0.1);
+            margin-left: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h1 style="font-size: 2.5rem; color: white;">Smart Campus <span style="color: var(--primary);">Triage System</span></h1>
+        <p style="color: #94a3b8; margin-top: 0.5rem;">Python DSA Final Project - In-Browser Simulation</p>
+    </div>
+
+    <div class="dashboard">
+        <!-- Sidebar Panel (Data Entry) -->
+        <div class="panel">
+            <h2 style="margin-bottom: 1.5rem;">Register Patient</h2>
+            <form id="patientForm">
+                <div class="form-group">
+                    <label>Patient Name</label>
+                    <input type="text" id="pName" required placeholder="e.g., Juan Dela Cruz">
+                </div>
+                <div class="form-group">
+                    <label>Patient ID (Numeric)</label>
+                    <input type="number" id="pId" required placeholder="e.g., 1001">
+                </div>
+                <div class="form-group">
+                    <label>Symptoms / Type</label>
+                    <select id="pType">
+                        <option value="routine">Routine Checkup (Queue)</option>
+                        <option value="emergency">Emergency (Priority Queue)</option>
+                    </select>
+                </div>
+                <div class="form-group" id="severityGroup" style="display:none;">
+                    <label>Severity Level (1-10)</label>
+                    <input type="number" id="pSeverity" min="1" max="10" value="5">
+                </div>
+                <button type="submit">Add to System</button>
+            </form>
+        </div>
+
+        <!-- Main Display Area -->
+        <div class="display-grid">
+            
+            <!-- Triage (Min-Heap) -->
+            <div class="panel">
+                <h2>
+                    Emergency Triage 
+                    <span class="stat-badge" style="background: rgba(255,8,68,0.2); color: #ffb199;">Min-Heap</span>
+                </h2>
+                <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 0.5rem;">Highest severity extracted first.</p>
+                <div class="critical-list" id="triageList">
+                    <p style="color: #444; font-style: italic; text-align: center; margin-top: 1rem;">No critical patients.</p>
+                </div>
+            </div>
+
+            <!-- Routine Queue -->
+            <div class="panel">
+                <h2>
+                    Routine Patients
+                    <span class="stat-badge" style="background: rgba(0,242,254,0.2); color: var(--primary);">Queue (FIFO)</span>
+                </h2>
+                <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 0.5rem;">First-in, First-out basis.</p>
+                <div class="queue-list" id="queueList">
+                    <p style="color: #444; font-style: italic;">Queue is empty.</p>
+                </div>
+                <button id="nextPatientBtn" style="margin-top: 1rem; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2);">Call Next Patient (Dequeue)</button>
+            </div>
+
+            <!-- Algorithm Benchmark (ILO2 Requirement) -->
+            <div class="panel full-width">
+                <h2>
+                    ILO2: Algorithm Comparison
+                    <span class="stat-badge" style="background: rgba(255,255,255,0.1); color: white;">BST vs Linear Search</span>
+                </h2>
+                <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 0.5rem;">Compare search execution time for patient records.</p>
+                
+                <div class="benchmark-controls">
+                    <input type="number" id="recordCount" value="10000" placeholder="Number of records">
+                    <button onclick="runBenchmark()">Run Benchmark</button>
+                </div>
+
+                <div class="chart-container">
+                    <div class="bar-group">
+                        <div class="bar-time" id="linearTime">0 ms</div>
+                        <div class="bar linear" id="linearBar"></div>
+                        <div class="bar-label">Linear Search</div>
+                    </div>
+                    <div class="bar-group">
+                        <div class="bar-time" id="binaryTime">0 ms</div>
+                        <div class="bar binary" id="binaryBar"></div>
+                        <div class="bar-label">Binary Search (BST)</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. DATA STRUCTURES IMPLEMENTATION (JavaScript)
+        // ==========================================
+
+        // A. Min-Heap for Emergency Triage
+        class MinHeap {
+            constructor() { this.heap = []; }
+            
+            insert(patient) {
+                this.heap.push(patient);
+                this.heapifyUp(this.heap.length - 1);
+            }
+
+            heapifyUp(index) {
+                while (index > 0) {
+                    let parentIndex = Math.floor((index - 1) / 2);
+                    // Higher severity number = higher priority
+                    if (this.heap[index].severity > this.heap[parentIndex].severity) {
+                        [this.heap[index], this.heap[parentIndex]] = [this.heap[parentIndex], this.heap[index]];
+                        index = parentIndex;
+                    } else break;
+                }
+            }
+
+            extractMax() {
+                if (this.heap.length === 0) return null;
+                if (this.heap.length === 1) return this.heap.pop();
+                const max = this.heap[0];
+                this.heap[0] = this.heap.pop();
+                this.heapifyDown(0);
+                return max;
+            }
+
+            heapifyDown(index) {
+                let left = 2 * index + 1;
+                let right = 2 * index + 2;
+                let largest = index;
+
+                if (left < this.heap.length && this.heap[left].severity > this.heap[largest].severity) largest = left;
+                if (right < this.heap.length && this.heap[right].severity > this.heap[largest].severity) largest = right;
+
+                if (largest !== index) {
+                    [this.heap[index], this.heap[largest]] = [this.heap[largest], this.heap[index]];
+                    this.heapifyDown(largest);
+                }
+            }
+            getAll() { return [...this.heap].sort((a,b) => b.severity - a.severity); }
+        }
+
+        // B. Queue for Routine Patients
+        class Queue {
+            constructor() { this.items = []; }
+            enqueue(patient) { this.items.push(patient); }
+            dequeue() { return this.items.shift(); }
+            getAll() { return this.items; }
+        }
+
+        // C. Binary Search Tree for Records
+        class BSTNode {
+            constructor(patient) { this.patient = patient; this.left = null; this.right = null; }
+        }
+        class BST {
+            constructor() { this.root = null; }
+            insert(patient) {
+                const newNode = new BSTNode(patient);
+                if (!this.root) { this.root = newNode; return; }
+                let current = this.root;
+                while (true) {
+                    if (patient.id < current.patient.id) {
+                        if (!current.left) { current.left = newNode; break; }
+                        current = current.left;
+                    } else {
+                        if (!current.right) { current.right = newNode; break; }
+                        current = current.right;
+                    }
+                }
+            }
+        }
+
+        // Initialize Systems
+        const triageHeap = new MinHeap();
+        const routineQueue = new Queue();
+        const recordBST = new BST();
+
+        // ==========================================
+        // 2. UI LOGIC & DOM MANIPULATION
+        // ==========================================
+
+        const form = document.getElementById('patientForm');
+        const typeSelect = document.getElementById('pType');
+        const severityGroup = document.getElementById('severityGroup');
+
+        typeSelect.addEventListener('change', (e) => {
+            severityGroup.style.display = e.target.value === 'emergency' ? 'block' : 'none';
+        });
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('pName').value;
+            const id = parseInt(document.getElementById('pId').value);
+            const type = typeSelect.value;
+            const severity = type === 'emergency' ? parseInt(document.getElementById('pSeverity').value) : 0;
+
+            const patient = { name, id, type, severity };
+
+            // Insert into BST (Records)
+            recordBST.insert(patient);
+
+            if (type === 'emergency') {
+                triageHeap.insert(patient);
+                updateTriageUI();
+            } else {
+                routineQueue.enqueue(patient);
+                updateQueueUI();
+            }
+
+            form.reset();
+            severityGroup.style.display = 'none';
+        });
+
+        function updateTriageUI() {
+            const list = document.getElementById('triageList');
+            const patients = triageHeap.getAll();
+            
+            if (patients.length === 0) {
+                list.innerHTML = '<p style="color: #444; font-style: italic; text-align: center; margin-top: 1rem;">No critical patients.</p>';
+                return;
+            }
+
+            list.innerHTML = patients.map(p => `
+                <div class="patient-card ${p.severity < 7 ? 'severe' : ''}">
+                    <div>
+                        <strong>${p.name}</strong> <span style="color:#94a3b8; font-size:0.8rem;">(ID: ${p.id})</span>
+                    </div>
+                    <div style="font-weight: 800; color: ${p.severity >= 7 ? '#ffb199' : '#ff0844'}">
+                        Severity: ${p.severity}/10
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateQueueUI() {
+            const list = document.getElementById('queueList');
+            const patients = routineQueue.getAll();
+            
+            if (patients.length === 0) {
+                list.innerHTML = '<p style="color: #444; font-style: italic;">Queue is empty.</p>';
+                return;
+            }
+
+            list.innerHTML = patients.map((p, index) => `
+                <div class="queue-item">${index === 0 ? '👉 ' : ''}${p.name} (${p.id})</div>
+            `).join('');
+        }
+
+        document.getElementById('nextPatientBtn').addEventListener('click', () => {
+            const next = routineQueue.dequeue();
+            if (next) {
+                alert(`Now calling: ${next.name} (ID: ${next.id})`);
+                updateQueueUI();
+            } else {
+                alert("Queue is empty!");
+            }
+        });
+
+        // ==========================================
+        // 3. ALGORITHM BENCHMARKING (ILO2)
+        // ==========================================
+
+        function runBenchmark() {
+            const size = parseInt(document.getElementById('recordCount').value);
+            if (size < 100) { alert("Please enter a size of at least 100."); return; }
+
+            // Generate mock dataset
+            const dataset = [];
+            for (let i = 0; i < size; i++) dataset.push(i * 2); // Even numbers
+            const target = dataset[Math.floor(size / 2)]; // Search for middle value
+
+            // 1. Linear Search
+            let start = performance.now();
+            for (let i = 0; i < dataset.length; i++) {
+                if (dataset[i] === target) break;
+            }
+            let linearTime = performance.now() - start;
+
+            // 2. Binary Search
+            start = performance.now();
+            let left = 0, right = dataset.length - 1;
+            while (left <= right) {
+                let mid = Math.floor((left + right) / 2);
+                if (dataset[mid] === target) break;
+                else if (dataset[mid] < target) left = mid + 1;
+                else right = mid - 1;
+            }
+            let binaryTime = performance.now() - start;
+
+            // Update UI
+            // Prevent 0ms display issues by using max(0.01, time)
+            const displayLinear = Math.max(0.01, linearTime).toFixed(3);
+            const displayBinary = Math.max(0.01, binaryTime).toFixed(3);
+
+            document.getElementById('linearTime').innerText = displayLinear + ' ms';
+            document.getElementById('binaryTime').innerText = displayBinary + ' ms';
+
+            // Calculate Bar Heights (Scale relative to the max time)
+            const maxTime = Math.max(linearTime, binaryTime);
+            document.getElementById('linearBar').style.height = `${(linearTime / maxTime) * 150 + 10}px`;
+            document.getElementById('binaryBar').style.height = `${(binaryTime / maxTime) * 150 + 10}px`;
+        }
+    </script>
+</body>
+</html>
