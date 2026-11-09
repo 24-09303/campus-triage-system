@@ -3,1788 +3,654 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MedTriage AI | Smart Campus Medical System</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <title>MedTriage AI • Smart Campus Triage System</title>
+    <!-- Google Fonts & Boxicons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #0a0e1a;
-            --bg-secondary: #111827;
-            --bg-tertiary: #1a2234;
-            --glass: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.08);
+            --bg-dark: #0b0f19;
+            --bg-card: rgba(18, 24, 38, 0.75);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
             --accent-cyan: #06b6d4;
-            --accent-blue: #3b82f6;
-            --accent-purple: #8b5cf6;
-            --accent-pink: #ec4899;
+            --accent-cyan-glow: rgba(6, 182, 212, 0.25);
             --accent-red: #ef4444;
-            --accent-orange: #f97316;
-            --accent-yellow: #eab308;
+            --accent-amber: #f59e0b;
             --accent-green: #10b981;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --text-tertiary: #64748b;
-            --gradient-primary: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
-            --gradient-danger: linear-gradient(135deg, #ef4444 0%, #ec4899 100%);
-            --gradient-success: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
-            --gradient-warning: linear-gradient(135deg, #f97316 0%, #eab308 100%);
+            --accent-purple: #8b5cf6;
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-main); min-height: 100vh; overflow-x: hidden; line-height: 1.5; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
 
-        body {
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
-            overflow-x: hidden;
-            position: relative;
+        /* Navbar */
+        header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem 2rem; background: rgba(11, 15, 25, 0.85);
+            backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color);
+            position: sticky; top: 0; z-index: 100;
         }
+        .logo { display: flex; align-items: center; gap: 0.75rem; font-size: 1.25rem; font-weight: 700; color: #fff; }
+        .logo i { font-size: 1.75rem; color: var(--accent-cyan); }
+        .user-controls { display: flex; align-items: center; gap: 1rem; }
+        .role-badge {
+            padding: 0.35rem 0.85rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600;
+            display: flex; align-items: center; gap: 0.4rem;
+        }
+        .role-patient { background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan); border: 1px solid rgba(6, 182, 212, 0.3); }
+        .role-admin { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); border: 1px solid rgba(239, 68, 68, 0.3); }
 
-        /* Animated Background */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(ellipse at 20% 10%, rgba(6, 182, 212, 0.08) 0%, transparent 40%),
-                radial-gradient(ellipse at 80% 90%, rgba(236, 72, 153, 0.08) 0%, transparent 40%),
-                radial-gradient(ellipse at 50% 50%, rgba(139, 92, 246, 0.05) 0%, transparent 60%);
-            pointer-events: none;
-            z-index: 0;
+        .btn {
+            padding: 0.55rem 1.1rem; border-radius: var(--radius-md); font-weight: 600; font-size: 0.85rem;
+            cursor: pointer; border: none; transition: var(--transition); display: inline-flex; align-items: center; gap: 0.5rem;
         }
+        .btn-primary { background: var(--accent-cyan); color: #000; box-shadow: 0 0 15px var(--accent-cyan-glow); }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); }
+        .btn-outline:hover { background: rgba(255, 255, 255, 0.05); }
+        .btn-danger { background: var(--accent-red); color: #fff; }
+        .btn-success { background: var(--accent-green); color: #000; }
 
-        /* Grid pattern overlay */
-        body::after {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
-            background-size: 50px 50px;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        /* Top Navigation */
-        .navbar {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: rgba(10, 14, 26, 0.8);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--glass-border);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-weight: 800;
-            font-size: 1.25rem;
-        }
-
-        .logo-icon {
-            width: 42px;
-            height: 42px;
-            background: var(--gradient-primary);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 20px rgba(6, 182, 212, 0.4); }
-            50% { box-shadow: 0 0 30px rgba(6, 182, 212, 0.7); }
-        }
-
-        .logo-text {
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .logo-subtitle {
-            display: block;
-            font-size: 0.7rem;
-            color: var(--text-tertiary);
-            font-weight: 500;
-            margin-top: -4px;
-        }
-
-        .nav-status {
-            display: flex;
-            gap: 1.5rem;
-            align-items: center;
-        }
-
-        .status-pill {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 50px;
-            font-size: 0.85rem;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--accent-green);
-            box-shadow: 0 0 10px var(--accent-green);
-            animation: blink 1.5s infinite;
-        }
-
-        @keyframes blink {
-            50% { opacity: 0.4; }
-        }
-
-        .live-time {
-            font-family: 'JetBrains Mono', monospace;
-            color: var(--accent-cyan);
-            font-weight: 600;
-        }
-
-        /* Main Layout */
-        .container {
-            position: relative;
-            z-index: 1;
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .hero {
-            text-align: center;
-            margin-bottom: 3rem;
-            animation: slideDown 0.8s ease;
-        }
-
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .hero h1 {
-            font-size: clamp(2rem, 5vw, 3.5rem);
-            font-weight: 900;
-            letter-spacing: -1.5px;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, #f1f5f9 0%, #94a3b8 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .hero h1 span {
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .hero p {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-            max-width: 600px;
-            margin: 0 auto;
-        }
+        /* Container */
+        main { max-width: 1350px; margin: 0 auto; padding: 2rem; }
 
         /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
         .stat-card {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 1.5rem;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
+            background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg);
+            padding: 1.25rem; backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: space-between;
         }
+        .stat-value { font-size: 1.8rem; font-weight: 800; }
+        .stat-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; tracking: 1px; }
 
-        .stat-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(6, 182, 212, 0.3);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        /* Main Grid */
+        .dashboard-grid { display: grid; grid-template-columns: 360px 1fr; gap: 1.75rem; }
+        @media (max-width: 992px) { .dashboard-grid { grid-template-columns: 1fr; } }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg); padding: 1.5rem; backdrop-filter: blur(10px);
         }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+        .card-title { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; }
 
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: var(--gradient-primary);
+        /* Forms */
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.4rem; }
+        .form-control {
+            width: 100%; padding: 0.65rem 0.9rem; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-color);
+            border-radius: var(--radius-md); color: #fff; font-size: 0.9rem; outline: none; transition: var(--transition);
         }
-
-        .stat-card.danger::before { background: var(--gradient-danger); }
-        .stat-card.success::before { background: var(--gradient-success); }
-        .stat-card.warning::before { background: var(--gradient-warning); }
-
-        .stat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .stat-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            background: var(--gradient-primary);
-        }
-
-        .stat-icon.danger { background: var(--gradient-danger); }
-        .stat-icon.success { background: var(--gradient-success); }
-        .stat-icon.warning { background: var(--gradient-warning); }
-
-        .stat-label {
-            font-size: 0.8rem;
-            color: var(--text-tertiary);
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            font-weight: 600;
-        }
-
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: 800;
-            margin-top: 0.5rem;
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .stat-trend {
-            font-size: 0.8rem;
-            color: var(--accent-green);
-            margin-top: 0.5rem;
-        }
-
-        /* Main Dashboard Grid */
-        .dashboard {
-            display: grid;
-            grid-template-columns: 380px 1fr;
-            gap: 1.5rem;
-        }
-
-        @media (max-width: 1024px) {
-            .dashboard {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .panel {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 1.75rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--glass-border);
-        }
-
-        .panel-title {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-size: 1.1rem;
-            font-weight: 700;
-        }
-
-        .panel-title i {
-            font-size: 1.4rem;
-            color: var(--accent-cyan);
-        }
-
-        .panel-badge {
-            font-size: 0.7rem;
-            padding: 0.25rem 0.75rem;
-            border-radius: 50px;
-            background: rgba(6, 182, 212, 0.15);
-            color: var(--accent-cyan);
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        .panel-badge.danger {
-            background: rgba(239, 68, 68, 0.15);
-            color: var(--accent-red);
-        }
-
-        .panel-badge.success {
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--accent-green);
-        }
-
-        /* Form */
-        .form-group {
-            margin-bottom: 1.25rem;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-
-        label {
-            display: block;
-            font-size: 0.75rem;
-            margin-bottom: 0.5rem;
-            color: var(--text-secondary);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        input, select, textarea {
-            width: 100%;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--glass-border);
-            padding: 0.85rem 1rem;
-            border-radius: 12px;
-            color: var(--text-primary);
-            font-size: 0.95rem;
-            font-family: 'Inter', sans-serif;
-            transition: all 0.3s ease;
-        }
-
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: var(--accent-cyan);
-            background: rgba(0, 0, 0, 0.4);
-            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 60px;
-        }
-
-        /* Severity Slider */
-        .severity-slider {
-            margin-top: 0.5rem;
-        }
-
-        .severity-display {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-        }
-
-        .severity-value {
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 800;
-            font-size: 1.1rem;
-        }
-
-        .severity-level {
-            font-size: 0.8rem;
-            padding: 0.2rem 0.6rem;
-            border-radius: 20px;
-            font-weight: 600;
-        }
-
-        input[type="range"] {
-            padding: 0;
-            height: 8px;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 50px;
-            appearance: none;
-            cursor: pointer;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            appearance: none;
-            width: 24px;
-            height: 24px;
-            background: var(--gradient-primary);
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
-        }
-
-        /* Buttons */
-        .btn {
-            width: 100%;
-            padding: 1rem;
-            border: none;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .btn-primary {
-            background: var(--gradient-primary);
-            color: white;
-            box-shadow: 0 4px 20px rgba(6, 182, 212, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(6, 182, 212, 0.5);
-        }
-
-        .btn-danger {
-            background: var(--gradient-danger);
-            color: white;
-            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3);
-        }
-
-        .btn-danger:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(239, 68, 68, 0.5);
-        }
-
-        .btn-ghost {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            color: var(--text-primary);
-        }
-
-        .btn-ghost:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: var(--accent-cyan);
-        }
+        .form-control:focus { border-color: var(--accent-cyan); box-shadow: 0 0 10px var(--accent-cyan-glow); }
 
         /* Tabs */
-        .tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 0.4rem;
-            border-radius: 12px;
+        .tabs { display: flex; gap: 0.5rem; border-bottom: 1px solid var(--border-color); margin-bottom: 1.25rem; overflow-x: auto; }
+        .tab-btn {
+            padding: 0.6rem 1rem; background: transparent; border: none; color: var(--text-muted);
+            font-weight: 600; font-size: 0.85rem; cursor: pointer; border-bottom: 2px solid transparent; transition: var(--transition);
+            white-space: nowrap;
         }
+        .tab-btn.active { color: var(--accent-cyan); border-bottom-color: var(--accent-cyan); }
 
-        .tab {
-            flex: 1;
-            padding: 0.75rem;
-            border: none;
-            background: transparent;
-            color: var(--text-secondary);
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.85rem;
-            transition: all 0.3s ease;
-            font-family: 'Inter', sans-serif;
+        /* Patient Cards in Queue */
+        .queue-item {
+            background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: var(--radius-md);
+            padding: 1rem; margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center;
         }
-
-        .tab.active {
-            background: var(--gradient-primary);
-            color: white;
-            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Patient Cards */
-        .patient-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            max-height: 500px;
-            overflow-y: auto;
-            padding-right: 0.5rem;
-        }
-
-        .patient-list::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .patient-list::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-        }
-
-        .patient-list::-webkit-scrollbar-thumb {
-            background: var(--accent-cyan);
-            border-radius: 10px;
-        }
-
-        .patient-card {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--glass-border);
-            border-radius: 14px;
-            padding: 1rem 1.25rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            transition: all 0.3s ease;
-            animation: slideInLeft 0.4s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .patient-card::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 4px;
-            height: 100%;
-        }
-
-        .patient-card.critical::before { background: var(--accent-red); }
-        .patient-card.high::before { background: var(--accent-orange); }
-        .patient-card.medium::before { background: var(--accent-yellow); }
-        .patient-card.low::before { background: var(--accent-green); }
-        .patient-card.routine::before { background: var(--accent-cyan); }
-
-        .patient-card:hover {
-            transform: translateX(4px);
-            border-color: var(--accent-cyan);
-        }
-
-        @keyframes slideInLeft {
-            from { opacity: 0; transform: translateX(-20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        .patient-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 1.2rem;
-            flex-shrink: 0;
-        }
-
-        .patient-info {
-            flex: 1;
-        }
-
-        .patient-name {
-            font-weight: 700;
-            font-size: 1rem;
-            margin-bottom: 0.2rem;
-        }
-
-        .patient-meta {
-            font-size: 0.78rem;
-            color: var(--text-tertiary);
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-
-        .patient-meta span {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-
         .severity-badge {
-            padding: 0.35rem 0.75rem;
-            border-radius: 50px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            font-family: 'JetBrains Mono', monospace;
+            width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 0.85rem;
         }
-
-        .severity-badge.critical {
-            background: rgba(239, 68, 68, 0.15);
-            color: var(--accent-red);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-
-        .severity-badge.high {
-            background: rgba(249, 115, 22, 0.15);
-            color: var(--accent-orange);
-            border: 1px solid rgba(249, 115, 22, 0.3);
-        }
-
-        .severity-badge.medium {
-            background: rgba(234, 179, 8, 0.15);
-            color: var(--accent-yellow);
-            border: 1px solid rgba(234, 179, 8, 0.3);
-        }
-
-        .severity-badge.low {
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--accent-green);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-        }
-
-        .queue-number {
-            background: var(--gradient-primary);
-            color: white;
-            padding: 0.5rem 0.75rem;
-            border-radius: 10px;
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 800;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 3rem 1rem;
-            color: var(--text-tertiary);
-        }
-
-        .empty-state i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            opacity: 0.3;
-        }
-
-        /* Benchmark Section */
-        .benchmark-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-top: 1rem;
-        }
-
-        @media (max-width: 768px) {
-            .benchmark-container {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .benchmark-input {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-        }
-
-        .benchmark-input input {
-            flex: 1;
-            min-width: 150px;
-        }
-
-        .benchmark-input .btn {
-            width: auto;
-            padding: 0.85rem 2rem;
-        }
-
-        .chart-wrapper {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 16px;
-            padding: 1.5rem;
-            border: 1px solid var(--glass-border);
-        }
-
-        .chart-container {
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-around;
-            height: 240px;
-            padding: 1rem 0;
-            gap: 2rem;
-            border-bottom: 2px solid var(--glass-border);
-            margin-bottom: 1rem;
-        }
-
-        .bar-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.75rem;
-            flex: 1;
-        }
-
-        .bar-wrapper {
-            width: 100%;
-            height: 180px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .bar {
-            width: 70%;
-            border-radius: 8px 8px 0 0;
-            transition: height 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-            position: relative;
-            min-height: 20px;
-        }
-
-        .bar.linear {
-            background: var(--gradient-danger);
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
-        }
-
-        .bar.binary {
-            background: var(--gradient-success);
-            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
-        }
-
-        .bar-label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-        }
-
-        .bar-time {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.95rem;
-            font-weight: 700;
-        }
-
-        .complexity-badges {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 1rem;
-        }
-
-        .complexity-badge {
-            padding: 0.5rem 1rem;
-            border-radius: 10px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            font-weight: 700;
-        }
-
-        .benchmark-results {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 16px;
-            padding: 1.5rem;
-            border: 1px solid var(--glass-border);
-        }
-
-        .result-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.85rem 0;
-            border-bottom: 1px solid var(--glass-border);
-        }
-
-        .result-row:last-child {
-            border-bottom: none;
-        }
-
-        .result-label {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .result-value {
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 700;
-        }
-
-        .speedup-highlight {
-            background: var(--gradient-success);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-size: 1.3rem;
-        }
-
-        /* History Timeline */
-        .timeline {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            max-height: 400px;
-            overflow-y: auto;
-            padding-right: 0.5rem;
-        }
-
-        .timeline-item {
-            display: flex;
-            gap: 1rem;
-            padding: 1rem;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
-            border-left: 3px solid var(--accent-green);
-        }
-
-        .timeline-icon {
-            width: 40px;
-            height: 40px;
-            background: rgba(16, 185, 129, 0.15);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--accent-green);
-            font-size: 1.3rem;
-            flex-shrink: 0;
-        }
-
-        .timeline-content {
-            flex: 1;
-        }
-
-        .timeline-name {
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-        }
-
-        .timeline-time {
-            font-size: 0.8rem;
-            color: var(--text-tertiary);
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        /* Search */
-        .search-container {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .search-container input {
-            flex: 1;
-        }
-
-        .search-result {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-top: 1rem;
-            border: 1px solid var(--glass-border);
-        }
-
-        /* Notification Toast */
-        .toast {
-            position: fixed;
-            top: 100px;
-            right: 20px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--glass-border);
-            padding: 1rem 1.5rem;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            z-index: 1000;
-            transform: translateX(400px);
-            transition: transform 0.4s ease;
-            backdrop-filter: blur(20px);
-            max-width: 400px;
-        }
-
-        .toast.show {
-            transform: translateX(0);
-        }
-
-        .toast.success { border-left: 4px solid var(--accent-green); }
-        .toast.error { border-left: 4px solid var(--accent-red); }
-        .toast.info { border-left: 4px solid var(--accent-cyan); }
-
-        .toast-icon {
-            font-size: 1.5rem;
-        }
-
-        .toast.success .toast-icon { color: var(--accent-green); }
-        .toast.error .toast-icon { color: var(--accent-red); }
-        .toast.info .toast-icon { color: var(--accent-cyan); }
-
-        /* Footer */
-        .footer {
-            text-align: center;
-            padding: 2rem;
-            color: var(--text-tertiary);
-            font-size: 0.85rem;
-            margin-top: 3rem;
-            border-top: 1px solid var(--glass-border);
-        }
-
-        .footer strong {
-            color: var(--accent-cyan);
-        }
-
-        /* Loading */
-        .loading {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid transparent;
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        .sev-high { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); border: 1px solid var(--accent-red); }
+        .sev-med { background: rgba(245, 158, 11, 0.2); color: var(--accent-amber); border: 1px solid var(--accent-amber); }
+        .sev-low { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); border: 1px solid var(--accent-green); }
 
         /* Modal */
         .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
-            z-index: 999;
-            display: none;
-            align-items: center;
-            justify-content: center;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center; z-index: 1000;
+            opacity: 0; pointer-events: none; transition: var(--transition);
         }
-
-        .modal-overlay.active {
-            display: flex;
-            animation: fadeIn 0.3s ease;
-        }
-
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
         .modal {
-            background: var(--bg-secondary);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 2rem;
-            max-width: 500px;
-            width: 90%;
-            text-align: center;
+            background: #0f172a; border: 1px solid var(--border-color); border-radius: var(--radius-lg);
+            width: 90%; max-width: 420px; padding: 1.75rem;
         }
 
-        .modal-icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 1.5rem;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-            animation: pulse 1.5s infinite;
-        }
+        /* Benchmark Bar */
+        .bar-container { background: rgba(255, 255, 255, 0.05); border-radius: 8px; overflow: hidden; height: 20px; margin-top: 5px; }
+        .bar-fill { height: 100%; background: var(--accent-cyan); width: 0%; transition: width 0.6s ease; }
 
-        .modal-icon.emergency {
-            background: var(--gradient-danger);
-            box-shadow: 0 0 40px rgba(239, 68, 68, 0.5);
-        }
-
-        .modal-icon.routine {
-            background: var(--gradient-primary);
-            box-shadow: 0 0 40px rgba(6, 182, 212, 0.5);
-        }
-
-        .modal h2 {
-            margin-bottom: 0.5rem;
-            font-size: 1.5rem;
-        }
-
-        .modal p {
-            color: var(--text-secondary);
-            margin-bottom: 1.5rem;
-        }
-
-        .modal-details {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-            text-align: left;
-        }
-
-        .modal-details div {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.4rem 0;
-            border-bottom: 1px solid var(--glass-border);
-        }
-
-        .modal-details div:last-child {
-            border-bottom: none;
-        }
+        .admin-only { display: none; }
+        .admin-mode .admin-only { display: block; }
     </style>
 </head>
 <body>
 
-    <!-- Navigation -->
-    <nav class="navbar">
+    <!-- Header / Navbar -->
+    <header>
         <div class="logo">
-            <div class="logo-icon">🏥</div>
-            <div>
-                <div class="logo-text">MedTriage AI</div>
-                <div class="logo-subtitle">Smart Campus Medical System</div>
-            </div>
+            <i class='bx bx-health'></i>
+            <span>MedTriage <span style="color: var(--accent-cyan)">AI</span></span>
         </div>
-        <div class="nav-status">
-            <div class="status-pill">
-                <div class="status-dot"></div>
-                <span>System Online</span>
+        <div class="user-controls">
+            <div id="roleBadge" class="role-badge role-patient">
+                <i class='bx bx-user'></i> <span id="roleText">Patient View</span>
             </div>
-            <div class="status-pill">
-                <i class='bx bx-time'></i>
-                <span class="live-time" id="liveTime">--:--:--</span>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container">
-        <!-- Hero -->
-        <div class="hero">
-            <h1>Intelligent Patient <span>Triage Dashboard</span></h1>
-            <p>Real-time emergency management powered by Max-Heap, FIFO Queue, and Binary Search Tree data structures</p>
-        </div>
-
-        <!-- Stats Overview -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon"><i class='bx bx-user-plus'></i></div>
-                    <div>
-                        <div class="stat-label">Registered</div>
-                    </div>
-                </div>
-                <div class="stat-value" id="statRegistered">0</div>
-                <div class="stat-trend"><i class='bx bx-up-arrow-alt'></i> Total patients today</div>
-            </div>
-
-            <div class="stat-card danger">
-                <div class="stat-header">
-                    <div class="stat-icon danger"><i class='bx bxs-ambulance'></i></div>
-                    <div>
-                        <div class="stat-label">Emergencies</div>
-                    </div>
-                </div>
-                <div class="stat-value" id="statEmergency">0</div>
-                <div class="stat-trend" style="color: var(--accent-red)"><i class='bx bx-pulse'></i> In triage queue</div>
-            </div>
-
-            <div class="stat-card warning">
-                <div class="stat-header">
-                    <div class="stat-icon warning"><i class='bx bxs-time-five'></i></div>
-                    <div>
-                        <div class="stat-label">Routine Waiting</div>
-                    </div>
-                </div>
-                <div class="stat-value" id="statRoutine">0</div>
-                <div class="stat-trend" style="color: var(--accent-yellow)"><i class='bx bx-walk'></i> FIFO queue</div>
-            </div>
-
-            <div class="stat-card success">
-                <div class="stat-header">
-                    <div class="stat-icon success"><i class='bx bxs-check-circle'></i></div>
-                    <div>
-                        <div class="stat-label">Treated Today</div>
-                    </div>
-                </div>
-                <div class="stat-value" id="statTreated">0</div>
-                <div class="stat-trend"><i class='bx bx-trending-up'></i> Successfully handled</div>
-            </div>
-        </div>
-
-        <!-- Main Dashboard -->
-        <div class="dashboard">
-            <!-- LEFT: Patient Registration -->
-            <div class="panel">
-                <div class="panel-header">
-                    <div class="panel-title">
-                        <i class='bx bx-user-circle'></i>
-                        Patient Registration
-                    </div>
-                    <span class="panel-badge">NEW ENTRY</span>
-                </div>
-
-                <form id="patientForm">
-                    <div class="form-group">
-                        <label>Full Name</label>
-                        <input type="text" id="pName" required placeholder="Juan Dela Cruz">
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Patient ID</label>
-                            <input type="number" id="pId" required placeholder="1001">
-                        </div>
-                        <div class="form-group">
-                            <label>Age</label>
-                            <input type="number" id="pAge" required placeholder="22" min="1" max="120">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Gender</label>
-                            <select id="pGender">
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Contact #</label>
-                            <input type="text" id="pContact" placeholder="09XX-XXX-XXXX">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Service Type</label>
-                        <select id="pType">
-                            <option value="routine">🩺 Routine Checkup</option>
-                            <option value="emergency">🚨 Emergency Triage</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group" id="severityGroup" style="display: none;">
-                        <label>Severity Level</label>
-                        <div class="severity-slider">
-                            <div class="severity-display">
-                                <span class="severity-value" id="severityVal">5</span>
-                                <span class="severity-level" id="severityLevel">Medium</span>
-                            </div>
-                            <input type="range" id="pSeverity" min="1" max="10" value="5">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Symptoms / Notes</label>
-                        <textarea id="pSymptoms" placeholder="Describe chief complaints..."></textarea>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">
-                        <i class='bx bx-plus-circle'></i>
-                        Register Patient
-                    </button>
-                </form>
-            </div>
-
-            <!-- RIGHT: Main View with Tabs -->
-            <div class="panel">
-                <div class="panel-header">
-                    <div class="panel-title">
-                        <i class='bx bx-grid-alt'></i>
-                        Operations Center
-                    </div>
-                    <span class="panel-badge success">LIVE</span>
-                </div>
-
-                <div class="tabs">
-                    <button class="tab active" data-tab="triage">
-                        <i class='bx bxs-ambulance'></i> Emergency Triage
-                    </button>
-                    <button class="tab" data-tab="routine">
-                        <i class='bx bx-list-ul'></i> Routine Queue
-                    </button>
-                    <button class="tab" data-tab="history">
-                        <i class='bx bx-history'></i> History
-                    </button>
-                    <button class="tab" data-tab="search">
-                        <i class='bx bx-search'></i> Records
-                    </button>
-                    <button class="tab" data-tab="benchmark">
-                        <i class='bx bx-tachometer'></i> Benchmark
-                    </button>
-                </div>
-
-                <!-- Triage Tab -->
-                <div class="tab-content active" id="triage-tab">
-                    <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                        <button class="btn btn-danger" id="callEmergency" style="flex: 1;">
-                            <i class='bx bxs-bell-ring'></i>
-                            Treat Top Priority (Extract-Max)
-                        </button>
-                    </div>
-                    <div class="patient-list" id="triageList">
-                        <div class="empty-state">
-                            <i class='bx bx-shield-plus'></i>
-                            <p>No emergency patients in triage</p>
-                            <small>Priority queue is empty</small>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Routine Tab -->
-                <div class="tab-content" id="routine-tab">
-                    <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                        <button class="btn btn-primary" id="callRoutine" style="flex: 1;">
-                            <i class='bx bx-bell'></i>
-                            Call Next Patient (Dequeue)
-                        </button>
-                    </div>
-                    <div class="patient-list" id="queueList">
-                        <div class="empty-state">
-                            <i class='bx bx-calendar-check'></i>
-                            <p>No patients in routine queue</p>
-                            <small>FIFO queue is empty</small>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- History Tab -->
-                <div class="tab-content" id="history-tab">
-                    <div style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
-                        <i class='bx bx-info-circle'></i>
-                        Recent treatment history (last 10 patients)
-                    </div>
-                    <div class="timeline" id="historyList">
-                        <div class="empty-state">
-                            <i class='bx bx-time'></i>
-                            <p>No treatment history yet</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Search Tab -->
-                <div class="tab-content" id="search-tab">
-                    <div style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
-                        <i class='bx bx-info-circle'></i>
-                        BST-based patient record lookup (compares Linear vs BST Search)
-                    </div>
-                    <div class="search-container">
-                        <input type="number" id="searchId" placeholder="Enter Patient ID">
-                        <button class="btn btn-primary" onclick="searchPatient()" style="width: auto; padding: 0 2rem;">
-                            <i class='bx bx-search-alt'></i> Search
-                        </button>
-                    </div>
-                    <div id="searchResult"></div>
-                </div>
-
-                <!-- Benchmark Tab -->
-                <div class="tab-content" id="benchmark-tab">
-                    <div style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
-                        <i class='bx bx-info-circle'></i>
-                        <strong>ILO2 Requirement:</strong> Compare Linear Search O(N) vs Binary Search O(log N)
-                    </div>
-
-                    <div class="benchmark-input">
-                        <input type="number" id="recordCount" value="100000" placeholder="Dataset size">
-                        <button class="btn btn-primary" onclick="runBenchmark()">
-                            <i class='bx bx-play'></i> Run Benchmark
-                        </button>
-                    </div>
-
-                    <div class="benchmark-container">
-                        <div class="chart-wrapper">
-                            <div class="chart-container">
-                                <div class="bar-group">
-                                    <div class="bar-time" id="linearTime" style="color: var(--accent-red)">0 ms</div>
-                                    <div class="bar-wrapper">
-                                        <div class="bar linear" id="linearBar" style="height: 20px;"></div>
-                                    </div>
-                                    <div class="bar-label">Linear Search</div>
-                                </div>
-                                <div class="bar-group">
-                                    <div class="bar-time" id="binaryTime" style="color: var(--accent-green)">0 ms</div>
-                                    <div class="bar-wrapper">
-                                        <div class="bar binary" id="binaryBar" style="height: 20px;"></div>
-                                    </div>
-                                    <div class="bar-label">Binary Search</div>
-                                </div>
-                            </div>
-                            <div class="complexity-badges">
-                                <div class="complexity-badge" style="background: rgba(239, 68, 68, 0.15); color: var(--accent-red);">O(N)</div>
-                                <div class="complexity-badge" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-green);">O(log N)</div>
-                            </div>
-                        </div>
-
-                        <div class="benchmark-results">
-                            <h3 style="margin-bottom: 1rem; font-size: 1rem;">
-                                <i class='bx bx-bar-chart-square' style="color: var(--accent-cyan)"></i> 
-                                Analysis Results
-                            </h3>
-                            <div class="result-row">
-                                <span class="result-label">Dataset Size</span>
-                                <span class="result-value" id="resSize">—</span>
-                            </div>
-                            <div class="result-row">
-                                <span class="result-label">Linear Search Time</span>
-                                <span class="result-value" style="color: var(--accent-red)" id="resLinear">—</span>
-                            </div>
-                            <div class="result-row">
-                                <span class="result-label">Binary Search Time</span>
-                                <span class="result-value" style="color: var(--accent-green)" id="resBinary">—</span>
-                            </div>
-                            <div class="result-row">
-                                <span class="result-label">Performance Speedup</span>
-                                <span class="result-value speedup-highlight" id="resSpeedup">—</span>
-                            </div>
-                            <div class="result-row">
-                                <span class="result-label">Winner</span>
-                                <span class="result-value" id="resWinner" style="color: var(--accent-green)">—</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="footer">
-            <p>CpE 411 Final Project • Built with <strong>Python Flask</strong> • Batangas State University - Alangilan Campus</p>
-            <p style="margin-top: 0.5rem;">Data Structures: <strong>Max-Heap</strong> • <strong>Queue (FIFO)</strong> • <strong>Binary Search Tree</strong></p>
-        </div>
-    </div>
-
-    <!-- Toast Notification -->
-    <div class="toast" id="toast">
-        <i class="toast-icon bx"></i>
-        <div>
-            <div style="font-weight: 700;" id="toastTitle">Title</div>
-            <div style="font-size: 0.85rem; color: var(--text-secondary);" id="toastMsg">Message</div>
-        </div>
-    </div>
-
-    <!-- Called Patient Modal -->
-    <div class="modal-overlay" id="calledModal">
-        <div class="modal">
-            <div class="modal-icon" id="modalIcon">🚨</div>
-            <h2 id="modalTitle">Now Treating</h2>
-            <p id="modalSubtitle">Please proceed to the treatment room</p>
-            <div class="modal-details" id="modalDetails"></div>
-            <button class="btn btn-primary" onclick="closeModal()">
-                <i class='bx bx-check'></i> Acknowledged
+            <button id="authBtn" class="btn btn-outline" onclick="openLoginModal()">
+                <i class='bx bx-lock-alt'></i> Staff Login
             </button>
         </div>
+    </header>
+
+    <main>
+        <!-- Stats Banner -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div>
+                    <div class="stat-label">Total Registered</div>
+                    <div class="stat-value mono" id="statRegistered">0</div>
+                </div>
+                <i class='bx bx-group' style="font-size: 2rem; color: var(--accent-cyan);"></i>
+            </div>
+            <div class="stat-card">
+                <div>
+                    <div class="stat-label">Emergency Waiting</div>
+                    <div class="stat-value mono" id="statEmergency">0</div>
+                </div>
+                <i class='bx bx-first-aid' style="font-size: 2rem; color: var(--accent-red);"></i>
+            </div>
+            <div class="stat-card">
+                <div>
+                    <div class="stat-label">Routine Waiting</div>
+                    <div class="stat-value mono" id="statRoutine">0</div>
+                </div>
+                <i class='bx bx-time-five' style="font-size: 2rem; color: var(--accent-amber);"></i>
+            </div>
+            <div class="stat-card">
+                <div>
+                    <div class="stat-label">Total Treated</div>
+                    <div class="stat-value mono" id="statTreated">0</div>
+                </div>
+                <i class='bx bx-check-double' style="font-size: 2rem; color: var(--accent-green);"></i>
+            </div>
+        </div>
+
+        <!-- Dashboard Layout -->
+        <div class="dashboard-grid">
+
+            <!-- LEFT SIDEBAR: Patient Form & Status Checker -->
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                
+                <!-- Registration Form -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title"><i class='bx bx-user-plus' style="color: var(--accent-cyan);"></i> Patient Registration</div>
+                    </div>
+                    <form id="regForm" onsubmit="handleRegister(event)">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="pName" class="form-control" placeholder="e.g. Juan Dela Cruz" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Student ID</label>
+                            <input type="text" id="pId" class="form-control" placeholder="e.g. 21-09303" required>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                            <div class="form-group">
+                                <label>Age</label>
+                                <input type="number" id="pAge" class="form-control" value="20" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Gender</label>
+                                <select id="pGender" class="form-control">
+                                    <option>Male</option>
+                                    <option>Female</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Service Request</label>
+                            <select id="pType" class="form-control" onchange="toggleSeveritySlider()">
+                                <option value="Routine">Routine Consultation / Medical Certificate</option>
+                                <option value="Emergency">Emergency / Urgent Medical Care</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="severityGroup">
+                            <label>Symptom Severity Score (1 - 10)</label>
+                            <input type="range" id="pSeverity" min="1" max="10" value="3" class="form-control" oninput="document.getElementById('sevVal').innerText = this.value">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
+                                <span>1 (Mild)</span>
+                                <span class="mono" id="sevVal" style="color: var(--accent-cyan); font-weight:700;">3</span>
+                                <span>10 (Critical)</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Symptoms / Remarks</label>
+                            <textarea id="pSymptoms" class="form-control" rows="2" placeholder="Describe current condition..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 0.5rem;">
+                            <i class='bx bx-send'></i> Register Patient
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Patient Queue Checker Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title"><i class='bx bx-search-alt' style="color: var(--accent-green);"></i> Check My Queue Status</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Enter Your Student ID</label>
+                        <input type="text" id="checkIdInput" class="form-control" placeholder="e.g. 21-09303">
+                    </div>
+                    <button class="btn btn-outline" style="width: 100%; justify-content: center;" onclick="checkMyStatus()">
+                        <i class='bx bx-check-circle'></i> Check Status
+                    </button>
+                    <div id="myStatusResult" style="margin-top: 1rem; display: none;"></div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT SECTION: Operations Center -->
+            <div class="card">
+                
+                <!-- Navigation Tabs -->
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab('triage')"><i class='bx bx-first-aid'></i> Triage Queue</button>
+                    <button class="tab-btn" onclick="switchTab('routine')"><i class='bx bx-list-ol'></i> Routine Queue</button>
+                    <button class="tab-btn admin-only" onclick="switchTab('history')"><i class='bx bx-history'></i> Treatment History</button>
+                    <button class="tab-btn admin-only" onclick="switchTab('search')"><i class='bx bx-search'></i> BST Search</button>
+                    <button class="tab-btn admin-only" onclick="switchTab('benchmark')"><i class='bx bx-tachometer'></i> Algorithm Benchmark</button>
+                </div>
+
+                <!-- TAB 1: EMERGENCY TRIAGE (MAX-HEAP) -->
+                <div id="tab-triage" class="tab-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Priority Queue sorted automatically using <b>Max-Heap O(log N)</b>.</p>
+                        <button class="btn btn-danger admin-only" onclick="callNextEmergency()">
+                            <i class='bx bx-bell'></i> Call Next Emergency
+                        </button>
+                    </div>
+                    <div id="emergencyQueueList"></div>
+                </div>
+
+                <!-- TAB 2: ROUTINE QUEUE (FIFO) -->
+                <div id="tab-routine" class="tab-content" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">First-In, First-Out queue managed using <b>FIFO Queue O(1)</b>.</p>
+                        <button class="btn btn-primary admin-only" onclick="callNextRoutine()">
+                            <i class='bx bx-user-check'></i> Call Next Patient
+                        </button>
+                    </div>
+                    <div id="routineQueueList"></div>
+                </div>
+
+                <!-- TAB 3: HISTORY (ADMIN ONLY) -->
+                <div id="tab-history" class="tab-content admin-only" style="display: none;">
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Completed patient treatments log.</p>
+                    <div id="historyList"></div>
+                </div>
+
+                <!-- TAB 4: BST SEARCH (ADMIN ONLY) -->
+                <div id="tab-search" class="tab-content admin-only" style="display: none;">
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Demonstrates Binary Search Tree O(log n) vs Linear Search O(n).</p>
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                        <input type="text" id="bstSearchInput" class="form-control" placeholder="Enter Student ID...">
+                        <button class="btn btn-primary" onclick="performBSTSearch()"><i class='bx bx-search'></i> Search</button>
+                    </div>
+                    <div id="bstSearchResult"></div>
+                </div>
+
+                <!-- TAB 5: BENCHMARK (ADMIN ONLY) -->
+                <div id="tab-benchmark" class="tab-content admin-only" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <div>
+                            <h4 style="font-weight: 700;">Comparative Algorithm Execution Analysis (ILO2)</h4>
+                            <p style="font-size: 0.8rem; color: var(--text-muted);">Linear Search vs. Binary Search across input sizes N = [100, 1,000, 10,000]</p>
+                        </div>
+                        <button class="btn btn-primary" onclick="runBenchmark()"><i class='bx bx-play'></i> Run Benchmark</button>
+                    </div>
+                    <div id="benchmarkOutput">
+                        <p style="color: var(--text-muted); text-align: center; padding: 2rem;">Click "Run Benchmark" to execute performance comparison.</p>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Staff Login Modal -->
+    <div id="loginModal" class="modal-overlay">
+        <div class="modal">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="font-size: 1.1rem; font-weight: 700;"><i class='bx bx-shield-quarter' style="color: var(--accent-red);"></i> Staff / Admin Login</h3>
+                <i class='bx bx-x' style="font-size: 1.5rem; cursor: pointer;" onclick="closeLoginModal()"></i>
+            </div>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="adminUser" class="form-control" placeholder="admin" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="adminPass" class="form-control" placeholder="••••••••" required>
+                </div>
+                <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem;">Demo credentials: <code>admin</code> / <code>batstateu411</code></p>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    <i class='bx bx-log-in'></i> Authenticate
+                </button>
+            </form>
+        </div>
     </div>
 
+    <!-- JavaScript Application Logic -->
     <script>
-        // ================================
-        // LIVE CLOCK
-        // ================================
-        function updateClock() {
-            const now = new Date();
-            const h = String(now.getHours()).padStart(2, '0');
-            const m = String(now.getMinutes()).padStart(2, '0');
-            const s = String(now.getSeconds()).padStart(2, '0');
-            document.getElementById('liveTime').textContent = `${h}:${m}:${s}`;
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
+        let isAdmin = false;
 
-        // ================================
-        // TAB SWITCHING
-        // ================================
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                tab.classList.add('active');
-                document.getElementById(tab.dataset.tab + '-tab').classList.add('active');
-            });
-        });
+        // Initialize state on load
+        window.onload = function() {
+            checkAuthStatus();
+            fetchData();
+        };
 
-        // ================================
-        // SEVERITY SLIDER
-        // ================================
-        const severitySlider = document.getElementById('pSeverity');
-        const severityVal = document.getElementById('severityVal');
-        const severityLevel = document.getElementById('severityLevel');
-
-        function updateSeverity() {
-            const v = parseInt(severitySlider.value);
-            severityVal.textContent = v;
-            let label, color;
-            if (v >= 9) { label = 'CRITICAL'; color = '#ef4444'; }
-            else if (v >= 7) { label = 'HIGH'; color = '#f97316'; }
-            else if (v >= 4) { label = 'MEDIUM'; color = '#eab308'; }
-            else { label = 'LOW'; color = '#10b981'; }
-            severityLevel.textContent = label;
-            severityLevel.style.background = color + '30';
-            severityLevel.style.color = color;
-        }
-        severitySlider.addEventListener('input', updateSeverity);
-        updateSeverity();
-
-        // ================================
-        // TOGGLE SEVERITY FIELD
-        // ================================
-        document.getElementById('pType').addEventListener('change', (e) => {
-            document.getElementById('severityGroup').style.display = 
-                e.target.value === 'emergency' ? 'block' : 'none';
-        });
-
-        // ================================
-        // TOAST NOTIFICATIONS
-        // ================================
-        function showToast(title, message, type = 'info') {
-            const toast = document.getElementById('toast');
-            const icon = toast.querySelector('.toast-icon');
-            toast.className = `toast show ${type}`;
-            document.getElementById('toastTitle').textContent = title;
-            document.getElementById('toastMsg').textContent = message;
-            
-            const iconMap = { success: 'bx-check-circle', error: 'bx-error-circle', info: 'bx-info-circle' };
-            icon.className = `toast-icon bx ${iconMap[type]}`;
-            
-            setTimeout(() => toast.classList.remove('show'), 4000);
-        }
-
-        // ================================
-        // MODAL
-        // ================================
-        function showCalledModal(patient, type) {
-            const modal = document.getElementById('calledModal');
-            const icon = document.getElementById('modalIcon');
-            const title = document.getElementById('modalTitle');
-            const subtitle = document.getElementById('modalSubtitle');
-            const details = document.getElementById('modalDetails');
-
-            if (type === 'emergency') {
-                icon.className = 'modal-icon emergency';
-                icon.textContent = '🚨';
-                title.textContent = 'EMERGENCY ALERT';
-                subtitle.textContent = `Immediate attention required!`;
-            } else {
-                icon.className = 'modal-icon routine';
-                icon.textContent = '👋';
-                title.textContent = 'Next Patient';
-                subtitle.textContent = 'Please proceed to the consultation room';
-            }
-
-            details.innerHTML = `
-                <div><strong>Name:</strong><span>${patient.name}</span></div>
-                <div><strong>ID:</strong><span>${patient.id}</span></div>
-                <div><strong>Age:</strong><span>${patient.age}</span></div>
-                ${patient.severity ? `<div><strong>Severity:</strong><span style="color: var(--accent-red)">${patient.severity}/10</span></div>` : ''}
-                <div><strong>Symptoms:</strong><span>${patient.symptoms}</span></div>
-            `;
-
-            modal.classList.add('active');
-        }
-
-        function closeModal() {
-            document.getElementById('calledModal').classList.remove('active');
-        }
-
-        // ================================
-        // HELPERS
-        // ================================
-        function getSeverityClass(severity) {
-            if (severity >= 9) return 'critical';
-            if (severity >= 7) return 'high';
-            if (severity >= 4) return 'medium';
-            return 'low';
-        }
-
-        function getInitials(name) {
-            return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
-        }
-
-        function getAvatarColor(name) {
-            const colors = ['#06b6d4', '#8b5cf6', '#ec4899', '#f97316', '#10b981', '#3b82f6'];
-            return colors[name.charCodeAt(0) % colors.length];
-        }
-
-        // ================================
-        // FORM SUBMIT - ADD PATIENT
-        // ================================
-        document.getElementById('patientForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const type = document.getElementById('pType').value;
-            const payload = {
-                name: document.getElementById('pName').value,
-                id: document.getElementById('pId').value,
-                age: document.getElementById('pAge').value,
-                gender: document.getElementById('pGender').value,
-                contact: document.getElementById('pContact').value,
-                type: type,
-                severity: type === 'emergency' ? document.getElementById('pSeverity').value : 0,
-                symptoms: document.getElementById('pSymptoms').value || 'Not specified'
-            };
-
-            try {
-                const res = await fetch('/api/add_patient', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+        function checkAuthStatus() {
+            fetch('/api/auth_status')
+                .then(r => r.json())
+                .then(d => {
+                    isAdmin = d.is_admin;
+                    updateRoleUI();
                 });
-                const data = await res.json();
-
-                if (data.error) {
-                    showToast('Error', data.error, 'error');
-                    return;
-                }
-
-                showToast('✅ Patient Registered!', `${payload.name} added to ${type === 'emergency' ? 'triage' : 'routine queue'}`, 'success');
-                renderAll(data);
-                document.getElementById('patientForm').reset();
-                document.getElementById('severityGroup').style.display = 'none';
-                updateSeverity();
-            } catch (err) {
-                showToast('Error', 'Failed to add patient', 'error');
-            }
-        });
-
-        // ================================
-        // CALL BUTTONS
-        // ================================
-        document.getElementById('callRoutine').addEventListener('click', async () => {
-            const res = await fetch('/api/next_routine', { method: 'POST' });
-            const data = await res.json();
-            if (data.called) {
-                showCalledModal(data.called, 'routine');
-                renderAll(data);
-            } else {
-                showToast('Empty Queue', 'No routine patients waiting', 'info');
-            }
-        });
-
-        document.getElementById('callEmergency').addEventListener('click', async () => {
-            const res = await fetch('/api/next_emergency', { method: 'POST' });
-            const data = await res.json();
-            if (data.called) {
-                showCalledModal(data.called, 'emergency');
-                renderAll(data);
-            } else {
-                showToast('No Emergencies', 'Triage queue is empty', 'info');
-            }
-        });
-
-        // ================================
-        // RENDER FUNCTIONS
-        // ================================
-        function renderAll(data) {
-            if (data.triage !== undefined) renderTriage(data.triage);
-            if (data.queue !== undefined) renderQueue(data.queue);
-            if (data.history !== undefined) renderHistory(data.history);
-            if (data.stats !== undefined) renderStats(data.stats, data.triage, data.queue);
         }
 
-        function renderStats(stats, triage, queue) {
-            document.getElementById('statRegistered').textContent = stats.total_registered || 0;
-            document.getElementById('statTreated').textContent = stats.total_treated || 0;
-            document.getElementById('statEmergency').textContent = triage ? triage.length : 0;
-            document.getElementById('statRoutine').textContent = queue ? queue.length : 0;
+        function updateRoleUI() {
+            const badge = document.getElementById('roleBadge');
+            const roleText = document.getElementById('roleText');
+            const authBtn = document.getElementById('authBtn');
+
+            if (isAdmin) {
+                document.body.classList.add('admin-mode');
+                badge.className = 'role-badge role-admin';
+                roleText.innerText = '⚡ Staff / Admin Mode';
+                authBtn.className = 'btn btn-danger';
+                authBtn.innerHTML = "<i class='bx bx-log-out'></i> Logout";
+                authBtn.onclick = handleLogout;
+            } else {
+                document.body.classList.remove('admin-mode');
+                badge.className = 'role-badge role-patient';
+                roleText.innerText = '👤 Patient View';
+                authBtn.className = 'btn btn-outline';
+                authBtn.innerHTML = "<i class='bx bx-lock-alt'></i> Staff Login";
+                authBtn.onclick = openLoginModal;
+            }
         }
 
-        function renderTriage(patients) {
-            const container = document.getElementById('triageList');
-            if (!patients || patients.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class='bx bx-shield-plus'></i>
-                        <p>No emergency patients in triage</p>
-                        <small>Priority queue is empty</small>
-                    </div>`;
+        function fetchData() {
+            fetch('/api/get_stats')
+                .then(r => r.json())
+                .then(d => {
+                    document.getElementById('statRegistered').innerText = d.stats.total_registered;
+                    document.getElementById('statEmergency').innerText = d.emergency_queue.length;
+                    document.getElementById('statRoutine').innerText = d.routine_queue.length;
+                    document.getElementById('statTreated').innerText = d.stats.total_treated;
+
+                    renderEmergencyQueue(d.emergency_queue);
+                    renderRoutineQueue(d.routine_queue);
+                    renderHistory(d.history);
+                });
+        }
+
+        function renderEmergencyQueue(queue) {
+            const container = document.getElementById('emergencyQueueList');
+            if (queue.length === 0) {
+                container.innerHTML = `<div style="text-align:center; color: var(--text-muted); padding: 2rem;">No emergency cases currently waiting.</div>`;
                 return;
             }
-            container.innerHTML = patients.map((p, i) => {
-                const sevClass = getSeverityClass(p.severity);
-                return `
-                <div class="patient-card ${sevClass}">
-                    <div class="patient-avatar" style="background: ${getAvatarColor(p.name)}30; color: ${getAvatarColor(p.name)};">
-                        ${getInitials(p.name)}
+            container.innerHTML = queue.map((p, idx) => `
+                <div class="queue-item">
+                    <div>
+                        <div style="font-weight: 700; color: #fff;">${idx + 1}. ${p.name} <span class="mono" style="font-size:0.8rem; color:var(--text-muted);">(${p.id})</span></div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">${p.symptoms} • Reg: ${p.registered_at}</div>
                     </div>
-                    <div class="patient-info">
-                        <div class="patient-name">
-                            ${i === 0 ? '🔥 ' : ''}${p.name}
-                        </div>
-                        <div class="patient-meta">
-                            <span><i class='bx bx-id-card'></i> ID: ${p.id}</span>
-                            <span><i class='bx bx-user'></i> ${p.age}y ${p.gender}</span>
-                            <span><i class='bx bx-time'></i> ${p.registered_at}</span>
-                        </div>
-                    </div>
-                    <div class="severity-badge ${sevClass}">
-                        ${p.severity}/10
-                    </div>
-                </div>`;
-            }).join('');
+                    <div class="severity-badge sev-high">${p.severity}</div>
+                </div>
+            `).join('');
         }
 
-        function renderQueue(patients) {
-            const container = document.getElementById('queueList');
-            if (!patients || patients.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class='bx bx-calendar-check'></i>
-                        <p>No patients in routine queue</p>
-                        <small>FIFO queue is empty</small>
-                    </div>`;
+        function renderRoutineQueue(queue) {
+            const container = document.getElementById('routineQueueList');
+            if (queue.length === 0) {
+                container.innerHTML = `<div style="text-align:center; color: var(--text-muted); padding: 2rem;">No routine patients in line.</div>`;
                 return;
             }
-            container.innerHTML = patients.map((p, i) => `
-                <div class="patient-card routine">
-                    <div class="queue-number">#${i + 1}</div>
-                    <div class="patient-info">
-                        <div class="patient-name">${i === 0 ? '👉 ' : ''}${p.name}</div>
-                        <div class="patient-meta">
-                            <span><i class='bx bx-id-card'></i> ID: ${p.id}</span>
-                            <span><i class='bx bx-user'></i> ${p.age}y</span>
-                            <span><i class='bx bx-time'></i> ${p.registered_at}</span>
-                        </div>
+            container.innerHTML = queue.map((p, idx) => `
+                <div class="queue-item">
+                    <div>
+                        <div style="font-weight: 700; color: #fff;">#${idx + 1} - ${p.name} <span class="mono" style="font-size:0.8rem; color:var(--text-muted);">(${p.id})</span></div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">${p.symptoms} • Reg: ${p.registered_at}</div>
                     </div>
+                    <div class="severity-badge sev-low">${p.severity}</div>
                 </div>
             `).join('');
         }
 
         function renderHistory(history) {
             const container = document.getElementById('historyList');
-            if (!history || history.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class='bx bx-time'></i>
-                        <p>No treatment history yet</p>
-                    </div>`;
+            if (history.length === 0) {
+                container.innerHTML = `<div style="text-align:center; color: var(--text-muted); padding: 2rem;">No completed treatments yet.</div>`;
                 return;
             }
             container.innerHTML = history.map(p => `
-                <div class="timeline-item">
-                    <div class="timeline-icon">
-                        <i class='bx ${p.type === 'emergency' ? 'bxs-ambulance' : 'bx-check-circle'}'></i>
+                <div class="queue-item" style="border-left: 3px solid var(--accent-green);">
+                    <div>
+                        <div style="font-weight: 700; color: #fff;">${p.name} (${p.id})</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">${p.type} • Treated at: ${p.treated_at}</div>
                     </div>
-                    <div class="timeline-content">
-                        <div class="timeline-name">${p.name} (ID: ${p.id})</div>
-                        <div style="font-size: 0.85rem; color: var(--text-secondary);">
-                            ${p.type === 'emergency' ? `Severity ${p.severity}/10 • ` : ''}${p.symptoms}
-                        </div>
-                        <div class="timeline-time">Treated at ${p.treated_at}</div>
-                    </div>
+                    <span class="mono" style="font-size:0.8rem; color:var(--accent-green);"><i class='bx bx-check-circle'></i> Completed</span>
                 </div>
             `).join('');
         }
 
-        // ================================
-        // SEARCH PATIENT
-        // ================================
-        async function searchPatient() {
-            const id = document.getElementById('searchId').value;
-            if (!id) { showToast('Error', 'Please enter a Patient ID', 'error'); return; }
+        function handleRegister(e) {
+            e.preventDefault();
+            const data = {
+                name: document.getElementById('pName').value,
+                id: document.getElementById('pId').value,
+                age: document.getElementById('pAge').value,
+                gender: document.getElementById('pGender').value,
+                type: document.getElementById('pType').value,
+                severity: document.getElementById('pSeverity').value,
+                symptoms: document.getElementById('pSymptoms').value
+            };
 
-            const res = await fetch('/api/search_patient', {
+            fetch('/api/add_patient', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: id })
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) {
+                    alert('Registration Successful! Your ID: ' + data.id);
+                    document.getElementById('regForm').reset();
+                    fetchData();
+                } else {
+                    alert('Error: ' + res.error);
+                }
             });
-            const data = await res.json();
+        }
 
-            const container = document.getElementById('searchResult');
-            if (data.patient) {
+        function checkMyStatus() {
+            const id = document.getElementById('checkIdInput').value;
+            if(!id) return alert('Please enter your Student ID!');
+
+            fetch('/api/my_status', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({id: id})
+            })
+            .then(r => r.json())
+            .then(res => {
+                const box = document.getElementById('myStatusResult');
+                box.style.display = 'block';
+                if (!res.found) {
+                    box.innerHTML = `<div style="padding:0.75rem; background:rgba(239,68,68,0.1); border:1px solid var(--accent-red); border-radius:8px; font-size:0.85rem; color:var(--accent-red);">${res.message}</div>`;
+                } else if (res.status === 'Treated') {
+                    box.innerHTML = `<div style="padding:0.75rem; background:rgba(16,185,129,0.1); border:1px solid var(--accent-green); border-radius:8px; font-size:0.85rem;">
+                        <strong>Status:</strong> Treated & Completed<br>
+                        <strong>Time:</strong> ${res.treated_at}
+                    </div>`;
+                } else {
+                    box.innerHTML = `<div style="padding:0.75rem; background:rgba(6,182,212,0.1); border:1px solid var(--accent-cyan); border-radius:8px; font-size:0.85rem;">
+                        <strong>Patient:</strong> ${res.patient.name}<br>
+                        <strong>Queue Type:</strong> ${res.status}<br>
+                        <strong>Position in Line:</strong> Spot #${res.position} of ${res.queue_size}
+                    </div>`;
+                }
+            });
+        }
+
+        function callNextEmergency() {
+            fetch('/api/next_emergency', {method: 'POST'})
+                .then(r => r.json())
+                .then(res => {
+                    if (res.success) {
+                        alert(`NOW CALLING EMERGENCY PATIENT:\n\n${res.patient.name} (${res.patient.id})\nSeverity: ${res.patient.severity}\nSymptoms: ${res.patient.symptoms}`);
+                        fetchData();
+                    } else alert(res.error);
+                });
+        }
+
+        function callNextRoutine() {
+            fetch('/api/next_routine', {method: 'POST'})
+                .then(r => r.json())
+                .then(res => {
+                    if (res.success) {
+                        alert(`NOW CALLING PATIENT:\n\n${res.patient.name} (${res.patient.id})`);
+                        fetchData();
+                    } else alert(res.error);
+                });
+        }
+
+        function performBSTSearch() {
+            const id = document.getElementById('bstSearchInput').value;
+            fetch('/api/search_patient', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({id: id})
+            })
+            .then(r => r.json())
+            .then(res => {
+                const container = document.getElementById('bstSearchResult');
+                if (!res.found) {
+                    container.innerHTML = `<p style="color:var(--accent-red);">Patient ID not found in BST.</p>`;
+                    return;
+                }
+                const m = res.metrics;
                 container.innerHTML = `
-                    <div class="search-result">
-                        <h3 style="margin-bottom: 1rem;">
-                            <i class='bx bx-check-circle' style="color: var(--accent-green)"></i>
-                            Patient Found
-                        </h3>
-                        <div class="modal-details">
-                            <div><strong>Name:</strong><span>${data.patient.name}</span></div>
-                            <div><strong>ID:</strong><span>${data.patient.id}</span></div>
-                            <div><strong>Age:</strong><span>${data.patient.age} / ${data.patient.gender}</span></div>
-                            <div><strong>Contact:</strong><span>${data.patient.contact}</span></div>
-                            <div><strong>Type:</strong><span>${data.patient.type}</span></div>
-                            ${data.patient.severity ? `<div><strong>Severity:</strong><span>${data.patient.severity}/10</span></div>` : ''}
-                            <div><strong>Symptoms:</strong><span>${data.patient.symptoms}</span></div>
-                            <div><strong>Registered:</strong><span>${data.patient.registered_at}</span></div>
-                        </div>
-                        <div style="background: rgba(6, 182, 212, 0.1); padding: 1rem; border-radius: 10px; margin-top: 1rem;">
-                            <div style="font-weight: 700; margin-bottom: 0.5rem;">⚡ Search Performance Comparison</div>
-                            <div style="display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;">
-                                <span>Linear: <span style="color: var(--accent-red)">${data.linear_time_ms}ms</span></span>
-                                <span>BST: <span style="color: var(--accent-green)">${data.bst_time_ms}ms</span></span>
-                                <span>Records: ${data.total_records}</span>
+                    <div style="background:rgba(255,255,255,0.03); padding:1rem; border-radius:8px; margin-top:1rem;">
+                        <h4>Found: ${res.patient.name}</h4>
+                        <p style="font-size:0.85rem; color:var(--text-muted);">Registered ID: ${res.patient.id} • Severity: ${res.patient.severity}</p>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-top:1rem;" class="mono">
+                            <div style="padding:0.5rem; background:rgba(6,182,212,0.1); border-radius:6px;">
+                                <strong>BST Search:</strong><br>Time: ${m.bst_time_ms} ms<br>Comparisons: ${m.bst_comparisons}
+                            </div>
+                            <div style="padding:0.5rem; background:rgba(245,158,11,0.1); border-radius:6px;">
+                                <strong>Linear Search:</strong><br>Time: ${m.linear_time_ms} ms<br>Comparisons: ${m.linear_comparisons}
                             </div>
                         </div>
-                    </div>`;
-            } else {
-                container.innerHTML = `
-                    <div class="search-result">
-                        <div style="text-align: center; padding: 1rem;">
-                            <i class='bx bx-error-circle' style="font-size: 3rem; color: var(--accent-red);"></i>
-                            <p style="margin-top: 1rem;">No patient found with ID: <strong>${id}</strong></p>
-                        </div>
-                    </div>`;
-            }
-        }
-
-        // ================================
-        // BENCHMARK
-        // ================================
-        async function runBenchmark() {
-            const size = document.getElementById('recordCount').value;
-            if (size < 100) { showToast('Error', 'Minimum size is 100', 'error'); return; }
-
-            showToast('Running', `Benchmarking with ${size} records...`, 'info');
-
-            const res = await fetch('/api/benchmark', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ size: size })
+                    </div>
+                `;
             });
-            const data = await res.json();
-
-            document.getElementById('linearTime').textContent = data.linear_time_ms + ' ms';
-            document.getElementById('binaryTime').textContent = data.binary_time_ms + ' ms';
-            document.getElementById('resSize').textContent = parseInt(data.size).toLocaleString();
-            document.getElementById('resLinear').textContent = data.linear_time_ms + ' ms';
-            document.getElementById('resBinary').textContent = data.binary_time_ms + ' ms';
-            document.getElementById('resSpeedup').textContent = data.speedup + '× faster';
-            document.getElementById('resWinner').textContent = data.binary_time_ms < data.linear_time_ms ? '🏆 Binary Search' : '🏆 Linear Search';
-
-            const maxTime = Math.max(data.linear_time_ms, data.binary_time_ms, 0.001);
-            document.getElementById('linearBar').style.height = `${Math.max((data.linear_time_ms / maxTime) * 160, 20)}px`;
-            document.getElementById('binaryBar').style.height = `${Math.max((data.binary_time_ms / maxTime) * 160, 20)}px`;
-
-            showToast('✅ Benchmark Complete', `Binary search is ${data.speedup}× faster!`, 'success');
         }
 
-        // ================================
-        // INITIAL LOAD
-        // ================================
-        window.addEventListener('load', async () => {
-            const res = await fetch('/api/get_stats');
-            const data = await res.json();
-            renderAll(data);
-        });
+        function runBenchmark() {
+            const out = document.getElementById('benchmarkOutput');
+            out.innerHTML = `<p class="mono" style="color:var(--accent-cyan);">Running benchmark tests...</p>`;
+            
+            fetch('/api/benchmark', {method: 'POST'})
+                .then(r => r.json())
+                .then(d => {
+                    let html = `<table style="width:100%; text-align:left; border-collapse:collapse; font-size:0.85rem;" class="mono">
+                        <tr style="border-bottom:1px solid var(--border-color); color:var(--text-muted);">
+                            <th style="padding:8px;">N</th>
+                            <th>Linear (ms)</th>
+                            <th>Binary (ms)</th>
+                            <th>Lin Comps</th>
+                            <th>Bin Comps</th>
+                            <th>Speedup</th>
+                        </tr>`;
+                    d.results.forEach(r => {
+                        html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                            <td style="padding:8px; color:var(--accent-cyan);">${r.size}</td>
+                            <td>${r.linear_ms}</td>
+                            <td style="color:var(--accent-green);">${r.binary_ms}</td>
+                            <td>${r.linear_comps}</td>
+                            <td>${r.binary_comps}</td>
+                            <td style="color:var(--accent-amber);">${r.speedup}x faster</td>
+                        </tr>`;
+                    });
+                    html += `</table>`;
+                    out.innerHTML = html;
+                });
+        }
 
-        // Close modal on outside click
-        document.getElementById('calledModal').addEventListener('click', (e) => {
-            if (e.target.id === 'calledModal') closeModal();
-        });
+        function handleLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('adminUser').value;
+            const p = document.getElementById('adminPass').value;
+
+            fetch('/api/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username: u, password: p})
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) {
+                    isAdmin = true;
+                    updateRoleUI();
+                    closeLoginModal();
+                    alert(res.message);
+                } else {
+                    alert(res.message);
+                }
+            });
+        }
+
+        function handleLogout() {
+            fetch('/api/logout', {method: 'POST'}).then(() => {
+                isAdmin = false;
+                updateRoleUI();
+                switchTab('triage');
+                alert('Logged out from admin panel.');
+            });
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById('tab-' + tabId).style.display = 'block';
+            event.currentTarget.classList.add('active');
+        }
+
+        function toggleSeveritySlider() {
+            const type = document.getElementById('pType').value;
+            document.getElementById('severityGroup').style.display = type === 'Emergency' ? 'block' : 'none';
+        }
+
+        function openLoginModal() { document.getElementById('loginModal').classList.add('active'); }
+        function closeLoginModal() { document.getElementById('loginModal').classList.remove('active'); }
     </script>
 </body>
 </html>
